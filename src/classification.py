@@ -11,7 +11,7 @@ File 5: Classification — Dự đoán Churn
           Lý do: tự nhiên cho ra feature importance, ít cần tune,
                  xử lý tốt dữ liệu hỗn hợp (numeric + binary)
 """
-
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,14 +27,17 @@ warnings.filterwarnings('ignore')
 # ─────────────────────────────────────────────
 # Load data từ File 3 + cluster label từ File 4
 # ─────────────────────────────────────────────
-X_train = pd.read_csv('X_train.csv')
-X_test  = pd.read_csv('X_test.csv')
-y_train = pd.read_csv('y_train.csv').squeeze()
-y_test  = pd.read_csv('y_test.csv').squeeze()
+PROJET_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PREPROCESSED_DIR  = os.path.join(PROJET_DIR, 'data/processed')
+CLUSTER_DIR = os.path.join(PROJET_DIR, 'data/clustering')
+X_train = pd.read_csv(os.path.join(PREPROCESSED_DIR, 'X_train.csv'))
+X_test  = pd.read_csv(os.path.join(PREPROCESSED_DIR, 'X_test.csv'))
+y_train = pd.read_csv(os.path.join(PREPROCESSED_DIR, 'y_train.csv')).squeeze()
+y_test  = pd.read_csv(os.path.join(PREPROCESSED_DIR, 'y_test.csv')).squeeze()
 
 # [DM] Thêm cluster label vào feature set
 # → Cluster là "nhóm nguy hiểm" → thông tin hữu ích cho model
-X_full_clustered = pd.read_csv('X_full_clustered.csv')
+X_full_clustered = pd.read_csv(os.path.join(CLUSTER_DIR, 'X_full_clustered.csv'))
 cluster_all = X_full_clustered['cluster'].values
 
 # Gán cluster cho train/test (dùng index giống File 3: 80/20 split)
@@ -42,7 +45,7 @@ n_train = len(X_train)
 X_train['cluster'] = cluster_all[:n_train]
 X_test['cluster']  = cluster_all[n_train:]
 
-with open('feature_names.pkl', 'rb') as f:
+with open(os.path.join(PREPROCESSED_DIR, 'feature_names.pkl'), 'rb') as f:
     feature_names = pickle.load(f)
 feature_names_with_cluster = list(X_train.columns)
 

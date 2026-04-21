@@ -9,7 +9,8 @@ File 3: Tiền xử lý & Chuẩn hóa
             - Clustering (File 4)  — tìm nhóm khách hàng
             - Classification (File 5) — dự đoán churn
 """
-
+import os 
+import sys
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -22,7 +23,9 @@ warnings.filterwarnings('ignore')
 # ─────────────────────────────────────────────
 # Load data gốc
 # ─────────────────────────────────────────────
-df = pd.read_csv("data_raw.csv")
+PROJET_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_RAW_PATH = os.path.join(PROJET_DIR, 'data/data_raw.csv')
+df = pd.read_csv(DATA_RAW_PATH)
 df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
 
 print("=" * 60)
@@ -210,24 +213,27 @@ print(f"  Lý do: KMeans dùng Euclidean distance — mọi feature cần cùng 
 # ─────────────────────────────────────────────
 print("\n── Bước 9: Lưu artifacts ──")
 
+
+PREPROCESSED_DIR = os.path.join(PROJET_DIR, 'data/processed')
+os.makedirs(PREPROCESSED_DIR, exist_ok=True)
 # Lưu data đã xử lý
-X_train_scaled.to_csv('X_train.csv', index=False)
-X_test_scaled.to_csv('X_test.csv', index=False)
-y_train.to_csv('y_train.csv', index=False)
-y_test.to_csv('y_test.csv', index=False)
-np.save('X_cluster.npy', X_cluster)
-X.to_csv('X_full.csv', index=False)
-y.to_csv('y_full.csv', index=False)
+X_train_scaled.to_csv(os.path.join(PREPROCESSED_DIR, "X_train.csv"), index=False)
+X_test_scaled.to_csv(os.path.join(PREPROCESSED_DIR, "X_test.csv"), index=False)
+y_train.to_csv(os.path.join(PREPROCESSED_DIR, "y_train.csv"), index=False)
+y_test.to_csv(os.path.join(PREPROCESSED_DIR, "y_test.csv"), index=False)
+np.save(os.path.join(PREPROCESSED_DIR, "X_cluster.npy"), X_cluster)
+X.to_csv(os.path.join(PREPROCESSED_DIR, "X_full.csv"), index=False)
+y.to_csv(os.path.join(PREPROCESSED_DIR, "y_full.csv"), index=False)
 
 # Lưu scaler để dùng ở bước retrain (File 7)
-with open('scaler.pkl', 'wb') as f:
+with open(os.path.join(PREPROCESSED_DIR, "scaler.pkl"), 'wb') as f:
     pickle.dump(scaler, f)
-with open('scaler_cluster.pkl', 'wb') as f:
+with open(os.path.join(PREPROCESSED_DIR, "scaler_cluster.pkl"), 'wb') as f:
     pickle.dump(scaler_cluster, f)
 
 # Lưu tên features để trace kết quả
 feature_names = list(X.columns)
-with open('feature_names.pkl', 'wb') as f:
+with open(os.path.join(PREPROCESSED_DIR, "feature_names.pkl"), 'wb') as f:
     pickle.dump(feature_names, f)
 
 print(f"  ✅ X_train.csv    — {X_train_scaled.shape}")
